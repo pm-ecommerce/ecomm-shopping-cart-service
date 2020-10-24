@@ -2,10 +2,7 @@ package com.pm.ecommerce.shoppingcart_service.controllers;
 
 import com.pm.ecommerce.entities.Address;
 import com.pm.ecommerce.entities.ApiResponse;
-import com.pm.ecommerce.entities.Cart;
-import com.pm.ecommerce.entities.Product;
-import com.pm.ecommerce.shoppingcart_service.interfaces.ICartService;
-import com.pm.ecommerce.shoppingcart_service.services.CartService;
+import com.pm.ecommerce.shoppingcart_service.services.ICartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,17 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class CartController {
     @Autowired
     private ICartService cartService;
-    /*
-     private int id;
-    private java.lang.String address1;
-    private java.lang.String address2;
-    private java.lang.String zipcode;
-    private java.lang.String city;
-    @javax.persistence.Column(length = 2)
-    private java.lang.String state;
-    @javax.persistence.Column(length = 3)
-    private java.lang.String country;
-     */
 
     @PostMapping("add")
     public ResponseEntity<ApiResponse<Address>> registerCart(@RequestBody Address postData) {

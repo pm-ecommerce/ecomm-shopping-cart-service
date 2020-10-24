@@ -1,14 +1,13 @@
-package com.pm.ecommerce.shoppingcart_service.services;
+package com.pm.ecommerce.shoppingcart_service.services.impl;
 
 import com.pm.ecommerce.entities.Address;
-import com.pm.ecommerce.entities.Cart;
-import com.pm.ecommerce.shoppingcart_service.interfaces.ICartService;
 import com.pm.ecommerce.shoppingcart_service.repositories.CartRepository;
+import com.pm.ecommerce.shoppingcart_service.services.ICartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CartService implements ICartService{
+public class CartService implements ICartService {
 
     @Autowired
     CartRepository cartRepository;
