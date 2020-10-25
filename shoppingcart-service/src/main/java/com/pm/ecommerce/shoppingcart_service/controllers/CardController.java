@@ -72,7 +72,7 @@ public class CardController {
             StripeTransaction transaction = new StripeTransaction();
             transaction.setCard(card);
             transaction.setAmount(amount);
-            transaction.setChargeId(charge.getId());
+//            transaction.setChargeId(charge.getId());
 
             response.setData(transaction);
 
