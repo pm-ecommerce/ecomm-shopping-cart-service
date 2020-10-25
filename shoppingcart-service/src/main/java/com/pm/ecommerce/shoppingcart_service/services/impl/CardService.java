@@ -25,11 +25,13 @@ public class CardService implements ICardService {
     @Autowired
     private CardRepository cardRepository;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     public Card addCard(CardRequest cardRequest, int accountId) throws Exception {
         Stripe.apiKey = "sk_test_51HfWSjLIEKOZlioqUhvNCD8NsAHgoe7zKES0ki8JYwXATcBuHUDgw8XTV96TmrFN8Z0IJnvrJ9pttxOZbaYboA2T00yp29ot3E";
-
 //        Account account = accountRepository.findById(accountId).orElse(null);
-//            if(account == null) throw new PostDataValidationException("Account Not Found");
+//        if(account == null) throw new Exception("Account Not Found");
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "DummyName");
@@ -39,14 +41,17 @@ public class CardService implements ICardService {
 
         //if customer is not valid, stripe will throw error or return null
         Card card = cardRequest.toCard();
+//        card.setUser(account);
         card.setCustomerId(customer.getId());
 
         return cardRepository.save(card);
     }
 
     @Override
-    public List<Card> getCards() {
-        return cardRepository.findAll();
+    public List<Card> getUserCards(int userId) throws Exception {
+        Account account = accountRepository.findById(userId).orElse(null);
+        if(account == null) throw new Exception("User Not Found");
+        return cardRepository.findAllByUser(account);
     }
 
     @Override
@@ -74,7 +79,7 @@ public class CardService implements ICardService {
     }
 
     @Override
-    public Card deleteCard(Integer cardId) {
+    public Card deleteCard(int cardId) {
         Card card = getCardById(cardId);
         cardRepository.delete(card);
         return card;
