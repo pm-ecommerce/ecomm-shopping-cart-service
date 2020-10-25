@@ -10,8 +10,9 @@ import org.springframework.stereotype.Service;
 public class AccountService implements IAccountService {
     @Autowired
     private AccountRepository accountRepository;
+
     @Override
-    public Account findById(Integer accountId) {
-        return accountRepository.findById(accountId).get();
+    public Account getAccount(Integer accountId) {
+        return accountRepository.findById(accountId).orElse(null);
     }
 }
