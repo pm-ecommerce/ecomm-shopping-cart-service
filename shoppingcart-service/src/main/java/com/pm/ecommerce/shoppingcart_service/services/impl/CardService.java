@@ -5,9 +5,12 @@ import com.pm.ecommerce.entities.Card;
 import com.pm.ecommerce.entities.StripeTransaction;
 import com.pm.ecommerce.entities.Transaction;
 import com.pm.ecommerce.shoppingcart_service.entities.CardRequest;
+import com.pm.ecommerce.shoppingcart_service.entities.CardResponse;
+import com.pm.ecommerce.shoppingcart_service.entities.TransactionResponse;
 import com.pm.ecommerce.shoppingcart_service.exceptions.PostDataValidationException;
 import com.pm.ecommerce.shoppingcart_service.repositories.AccountRepository;
 import com.pm.ecommerce.shoppingcart_service.repositories.CardRepository;
+import com.pm.ecommerce.shoppingcart_service.repositories.TransactionRepository;
 import com.pm.ecommerce.shoppingcart_service.services.ICardService;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
@@ -28,23 +31,26 @@ public class CardService implements ICardService {
     @Autowired
     private AccountRepository accountRepository;
 
-    public Card addCard(CardRequest cardRequest, int accountId) throws Exception {
-        Stripe.apiKey = "sk_test_51HfWSjLIEKOZlioqUhvNCD8NsAHgoe7zKES0ki8JYwXATcBuHUDgw8XTV96TmrFN8Z0IJnvrJ9pttxOZbaYboA2T00yp29ot3E";
-//        Account account = accountRepository.findById(accountId).orElse(null);
-//        if(account == null) throw new Exception("Account Not Found");
+    @Autowired
+    TransactionRepository transactionRepository;
+
+    public CardResponse addCard(CardRequest cardRequest, int accountId) throws Exception {
+        Stripe.apiKey = "sk_test_I8Ora3L8Af2oo9fgBykDOAxj";
+        Account account = accountRepository.findById(accountId).orElse(null);
+        if(account == null) throw new Exception("Account Not Found");
 
         Map<String, Object> params = new HashMap<>();
-        params.put("name", "DummyName");
-        params.put("email", "dummyemail@gmail.com");
+        params.put("name", account.getName());
+        params.put("email", account.getEmail());
         params.put("source", cardRequest.getToken());
         Customer customer = Customer.create(params);
 
         //if customer is not valid, stripe will throw error or return null
         Card card = cardRequest.toCard();
-//        card.setUser(account);
+       card.setUser(account);
         card.setCustomerId(customer.getId());
 
-        return cardRepository.save(card);
+        return new CardResponse(cardRepository.save(card)) ;
     }
 
     @Override
@@ -55,13 +61,20 @@ public class CardService implements ICardService {
     }
 
     @Override
-    public Transaction chargeCard(int cardId, double amount) throws StripeException {
-        Stripe.apiKey = "sk_test_51HfWSjLIEKOZlioqUhvNCD8NsAHgoe7zKES0ki8JYwXATcBuHUDgw8XTV96TmrFN8Z0IJnvrJ9pttxOZbaYboA2T00yp29ot3E";
+    public TransactionResponse chargeCard(int accountId, int cardId, double amount) throws Exception {
+        Stripe.apiKey = "sk_test_I8Ora3L8Af2oo9fgBykDOAxj";
+
+        Account account = accountRepository.findById(accountId).orElse(null);
+
+        if (account==null) throw new Exception("Account not found");
 
         Card card = cardRepository.findById(cardId).orElse(null);
+        if (card==null) throw new Exception("Card not found");
+
+        if (card.getUser().getId()!=account.getId()) throw new Exception("This card does not belong to this account");
 
         Map<String, Object> params = new HashMap<>();
-        params.put("amount", amount);
+        params.put("amount", (int) amount*100);
         params.put("currency", "usd");
         params.put("customer", card.getCustomerId());
         params.put("description", "My First Test Charge (created for API docs)");
@@ -70,8 +83,10 @@ public class CardService implements ICardService {
         StripeTransaction transaction = new StripeTransaction();
         transaction.setCard(card);
         transaction.setAmount(amount);
-//        transaction.setChargeId(charge.getId());
-        return transaction;
+
+        transaction.setChargeId(charge.getId());
+        transactionRepository.save(transaction);
+        return new TransactionResponse(transaction);
     }
 
     public Card getCardById(int id){
