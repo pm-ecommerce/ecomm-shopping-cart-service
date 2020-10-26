@@ -2,6 +2,8 @@ package com.pm.ecommerce.shoppingcart_service.controllers;
 
 import com.pm.ecommerce.entities.*;
 import com.pm.ecommerce.shoppingcart_service.entities.CardRequest;
+import com.pm.ecommerce.shoppingcart_service.entities.CardResponse;
+import com.pm.ecommerce.shoppingcart_service.entities.TransactionResponse;
 import com.pm.ecommerce.shoppingcart_service.exceptions.PostDataValidationException;
 import com.pm.ecommerce.shoppingcart_service.services.IAccountService;
 import com.pm.ecommerce.shoppingcart_service.services.ICardService;
@@ -13,21 +15,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/card")
 public class CardController {
     @Autowired
     private ICardService cardService;
 
     @PostMapping("/{accountId}")
-    public ResponseEntity<ApiResponse<Card>> addCard(@RequestBody CardRequest cardRequest, @PathVariable Integer accountId) {
-        ApiResponse<Card> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<CardResponse>> addCard(@RequestBody CardRequest cardRequest, @PathVariable Integer accountId) {
+        ApiResponse<CardResponse> response = new ApiResponse<>();
         try{
 //            Account account = accountService.getAccount(accountId);
 //            if(account == null) throw new PostDataValidationException("Account Not Found");
-            Card card = cardService.addCard(cardRequest, accountId);
+            CardResponse card = cardService.addCard(cardRequest, accountId);
             response.setMessage("Card Successfully Added");
             response.setData(card);
         } catch (Exception e){
+            e.printStackTrace();
             response.setStatus(500);
             response.setMessage(e.getMessage());
 
@@ -69,12 +73,12 @@ public class CardController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("{cardId}/{amount}")
-    public ResponseEntity<ApiResponse<Transaction>> chargeCard(@PathVariable int cardId, @PathVariable double amount)
+    @GetMapping("{accountId}/{cardId}/{amount}")
+    public ResponseEntity<ApiResponse<TransactionResponse>> chargeCard(@PathVariable int accountId, @PathVariable int cardId, @PathVariable double amount)
             throws PostDataValidationException{
-        ApiResponse<Transaction> response = new ApiResponse<>();
+        ApiResponse<TransactionResponse> response = new ApiResponse<>();
         try{
-            Transaction transaction = cardService.chargeCard(cardId, amount);
+            TransactionResponse transaction = cardService.chargeCard(accountId, cardId, amount);
             response.setData(transaction);
 
         } catch(StripeException e){
