@@ -25,8 +25,6 @@ public class CardController {
     public ResponseEntity<ApiResponse<CardResponse>> addCard(@RequestBody CardRequest cardRequest, @PathVariable Integer accountId) {
         ApiResponse<CardResponse> response = new ApiResponse<>();
         try{
-//            Account account = accountService.getAccount(accountId);
-//            if(account == null) throw new PostDataValidationException("Account Not Found");
             CardResponse card = cardService.addCard(cardRequest, accountId);
             response.setMessage("Card Successfully Added");
             response.setData(card);
