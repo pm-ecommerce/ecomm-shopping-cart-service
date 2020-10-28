@@ -5,11 +5,11 @@ import lombok.Data;
 
 @Data
 public class TransactionResponse {
-    int id;
-    double amount;
+    private int id;
+    private double amount;
 
     public TransactionResponse(Transaction transaction) {
-        id = transaction.getId();
-        amount= transaction.getAmount();
+        this.id = transaction.getId();
+        this.amount= transaction.getAmount();
     }
 }
