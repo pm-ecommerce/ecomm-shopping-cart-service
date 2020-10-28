@@ -46,7 +46,7 @@ public class CardService implements ICardService {
         Customer customer = Customer.create(params);
         //if customer is not valid, stripe will throw error or return null
         Card card = cardRequest.toCard();
-       card.setUser(account);
+        card.setUser(account);
         card.setCustomerId(customer.getId());
 
         return new CardResponse(cardRepository.save(card)) ;
