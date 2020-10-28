@@ -13,29 +13,48 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin
 @RequestMapping("api/cart")
 public class CartController {
-    @Autowired
     private ICartService cartService;
 
-    @GetMapping("{userId}")
-    public ResponseEntity<ApiResponse<Cart>> viewCart(@PathVariable int userId){
+    @Autowired
+    public CartController(ICartService cartService){
+        this.cartService = cartService;
+    }
+
+    @GetMapping("")
+    public ResponseEntity<ApiResponse<Cart>> initCart(){
         ApiResponse<Cart> response = new ApiResponse<>();
         try{
-            Cart cart = cartService.getCart(userId);
+            Cart cart = cartService.initCart();
             response.setData(cart);
         } catch(Exception e){
             response.setStatus(500);
             response.setMessage(e.getMessage());
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("{cartId}")
-    public ResponseEntity<ApiResponse<Cart>> addProduct(@RequestBody CartItem item, @PathVariable int cartId) {
+    @GetMapping("{sessionId}")
+    public ResponseEntity<ApiResponse<Cart>> viewCart(@PathVariable(name = "sessionId") String sessionId){
+        ApiResponse<Cart> response = new ApiResponse<>();
+        try{
+            Cart cart = cartService.getCart(sessionId);
+            response.setData(cart);
+        } catch(Exception e){
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("{sessionId}")
+    public ResponseEntity<ApiResponse<Cart>> addProduct(@RequestBody CartItem item, @PathVariable String sessionId) {
         ApiResponse<Cart> response = new ApiResponse<>();
         try {
-            Cart cart = cartService.addProduct(item, cartId);
+            Cart cart = cartService.addProduct(item, sessionId);
             response.setData(cart);
             response.setMessage("Cart registered successfully.");
         } catch (Exception e) {
@@ -47,11 +66,11 @@ public class CartController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("{cartId}")
-    public ResponseEntity<ApiResponse<Cart>> updateProduct(@RequestBody CartItem item, @PathVariable int cartId){
+    @PatchMapping("{sessionId}")
+    public ResponseEntity<ApiResponse<Cart>> updateProduct(@RequestBody CartItem item, @PathVariable String sessionId){
         ApiResponse<Cart> response = new ApiResponse<>();
         try{
-            Cart cart = cartService.updateProduct(item, cartId);
+            Cart cart = cartService.updateProduct(item, sessionId);
             response.setData(cart);
             response.setMessage("Cart Items updated");
         } catch(Exception e){
@@ -62,11 +81,11 @@ public class CartController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("{cartId}")
-    public ResponseEntity<ApiResponse<Cart>> deleteProduct(@RequestBody CartItem item, @PathVariable int cartId){
+    @DeleteMapping("{sessionId}")
+    public ResponseEntity<ApiResponse<Cart>> deleteProduct(@RequestBody CartItem item, @PathVariable String sessionId){
         ApiResponse<Cart> response = new ApiResponse<>();
         try{
-            Cart cart = cartService.deleteProduct(item, cartId);
+            Cart cart = cartService.deleteProduct(item, sessionId);
             response.setData(cart);
             response.setMessage("Cart Items updated");
         } catch(Exception e){

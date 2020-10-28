@@ -15,8 +15,12 @@ import java.util.List;
 @RequestMapping("/api/address")
 public class AddressController {
 
-    @Autowired
     private IAddressService addressService;
+
+    @Autowired
+    public AddressController(IAddressService addressService){
+        this.addressService = addressService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Address>> registerAddress(@RequestBody Address postData) {
