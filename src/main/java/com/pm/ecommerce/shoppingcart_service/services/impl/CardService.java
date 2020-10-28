@@ -3,17 +3,14 @@ package com.pm.ecommerce.shoppingcart_service.services.impl;
 import com.pm.ecommerce.entities.Account;
 import com.pm.ecommerce.entities.Card;
 import com.pm.ecommerce.entities.StripeTransaction;
-import com.pm.ecommerce.entities.Transaction;
 import com.pm.ecommerce.shoppingcart_service.entities.CardRequest;
 import com.pm.ecommerce.shoppingcart_service.entities.CardResponse;
 import com.pm.ecommerce.shoppingcart_service.entities.TransactionResponse;
-import com.pm.ecommerce.shoppingcart_service.exceptions.PostDataValidationException;
 import com.pm.ecommerce.shoppingcart_service.repositories.AccountRepository;
 import com.pm.ecommerce.shoppingcart_service.repositories.CardRepository;
 import com.pm.ecommerce.shoppingcart_service.repositories.TransactionRepository;
 import com.pm.ecommerce.shoppingcart_service.services.ICardService;
 import com.stripe.Stripe;
-import com.stripe.exception.StripeException;
 import com.stripe.model.Charge;
 import com.stripe.model.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,14 +22,18 @@ import java.util.Map;
 
 @Service
 public class CardService implements ICardService {
-    @Autowired
     private CardRepository cardRepository;
 
-    @Autowired
     private AccountRepository accountRepository;
 
+    private TransactionRepository transactionRepository;
+
     @Autowired
-    TransactionRepository transactionRepository;
+    public CardService(CardRepository cardRepository, AccountRepository accountRepository, TransactionRepository transactionRepository){
+        this.cardRepository = cardRepository;
+        this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
+    }
 
     public CardResponse addCard(CardRequest cardRequest, int accountId) throws Exception {
         Stripe.apiKey = "sk_test_I8Ora3L8Af2oo9fgBykDOAxj";

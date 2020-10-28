@@ -4,8 +4,6 @@ import com.pm.ecommerce.entities.*;
 import com.pm.ecommerce.shoppingcart_service.entities.CardRequest;
 import com.pm.ecommerce.shoppingcart_service.entities.CardResponse;
 import com.pm.ecommerce.shoppingcart_service.entities.TransactionResponse;
-import com.pm.ecommerce.shoppingcart_service.exceptions.PostDataValidationException;
-import com.pm.ecommerce.shoppingcart_service.services.IAccountService;
 import com.pm.ecommerce.shoppingcart_service.services.ICardService;
 import com.stripe.exception.StripeException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +16,12 @@ import java.util.List;
 @CrossOrigin
 @RequestMapping("/api/card")
 public class CardController {
-    @Autowired
     private ICardService cardService;
+
+    @Autowired
+    public CardController(ICardService cardService){
+        this.cardService = cardService;
+    }
 
     @PostMapping("/{accountId}")
     public ResponseEntity<ApiResponse<CardResponse>> addCard(@RequestBody CardRequest cardRequest, @PathVariable Integer accountId) {
@@ -55,7 +57,7 @@ public class CardController {
     }
 
     @GetMapping("{userId}")
-    public ResponseEntity<ApiResponse<List<Card>>> getCards(@PathVariable int userId) throws Exception{
+    public ResponseEntity<ApiResponse<List<Card>>> getCards(@PathVariable int userId) {
         ApiResponse<List<Card>> response = new ApiResponse<>();
         try{
             List<Card> cards = cardService.getUserCards(userId);
@@ -72,8 +74,7 @@ public class CardController {
     }
 
     @GetMapping("{accountId}/{cardId}/{amount}")
-    public ResponseEntity<ApiResponse<TransactionResponse>> chargeCard(@PathVariable int accountId, @PathVariable int cardId, @PathVariable double amount)
-            throws PostDataValidationException{
+    public ResponseEntity<ApiResponse<TransactionResponse>> chargeCard(@PathVariable int accountId, @PathVariable int cardId, @PathVariable double amount) {
         ApiResponse<TransactionResponse> response = new ApiResponse<>();
         try{
             TransactionResponse transaction = cardService.chargeCard(accountId, cardId, amount);
