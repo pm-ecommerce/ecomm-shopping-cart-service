@@ -6,7 +6,6 @@ import com.pm.ecommerce.enums.VendorStatus;
 import com.pm.ecommerce.shoppingcart_service.entities.CartItemRequest;
 import com.pm.ecommerce.shoppingcart_service.entities.CartItemResponse;
 import com.pm.ecommerce.shoppingcart_service.entities.CartResponse;
-import com.pm.ecommerce.shoppingcart_service.repositories.CartItemRepository;
 import com.pm.ecommerce.shoppingcart_service.repositories.CartRepository;
 import com.pm.ecommerce.shoppingcart_service.repositories.ProductRepository;
 import com.pm.ecommerce.shoppingcart_service.services.ICartService;
@@ -21,13 +20,11 @@ import java.util.UUID;
 @Service
 public class CartService implements ICartService {
     private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
 
     @Autowired
-    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository) {
+    public CartService(CartRepository cartRepository, ProductRepository productRepository) {
         this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
     }
 
@@ -53,6 +50,7 @@ public class CartService implements ICartService {
         List<CartItemResponse> cartItems = new ArrayList<>();
         for (CartItem item : cart.getCartItems()) {
             CartItemResponse cartItemResponse = new CartItemResponse(item);
+//            cartItemResponse.setUserId(cart.getUser().getId());
             cartItems.add(cartItemResponse);
         }
         return cartItems;
@@ -111,8 +109,12 @@ public class CartService implements ICartService {
                 }
             }
         }
-
-        return new CartItemResponse(cartItem);
+        //If Guest User it will return No userId
+        User user = cart.getUser();
+        if(user == null){
+            return new CartItemResponse(cartItem);
+        }
+        return new CartItemResponse(cartItem, user.getId());
     }
 
     public CartItemResponse updateCartItem(CartItemRequest item, String sessionId) throws Exception {
@@ -122,34 +124,39 @@ public class CartService implements ICartService {
         }
 
         CartItem cartItem = cart.getCartItems().stream().reduce(null, (a, b) -> b.getId() == item.getId() ? b : a);
-        if (cartItem == null)
+        if (cartItem == null) {
             throw new Exception("Cart Item Not Found");
-
+        }
         //Checking Product validation
         Product product = productRepository.findById(cartItem.getProduct().getId()).orElse(null);
         if (product == null || product.getStatus() != ProductStatus.PUBLISHED) {
             // delete cart item from cart
-            throw new Exception("Product not Valid");
+            deleteCartItem(item.getId(), sessionId);
         }
 
         //Checking Vendor status
         Vendor vendor = product.getVendor();
         if (vendor == null || vendor.getStatus() != VendorStatus.APPROVED) {
             // delete cart item from cart
-            throw new Exception("Vendor status not Approved");
+            deleteCartItem(item.getId(), sessionId);
         }
 
         //Checking Vendor status
         Category category = product.getCategory();
         if (category == null || category.isDeleted()) {
             // delete cart item from cart
-            throw new Exception("Category is not available");
+            deleteCartItem(item.getId(), sessionId);
         }
 
         cartItem.setQuantity(item.getQuantity());
 
         cartRepository.save(cart);
-        return new CartItemResponse(cartItemRepository.save(cartItem));
+        //If Guest User it will return No userId
+        User user = cart.getUser();
+        if(user == null){
+            return new CartItemResponse(cartItem);
+        }
+        return new CartItemResponse(cartItem, user.getId());
     }
 
     @Override
@@ -164,27 +171,15 @@ public class CartService implements ICartService {
             throw new Exception("Cart Item Not found");
         }
 
-        Product product = item.getProduct();
-        if (product.getStatus() != ProductStatus.PUBLISHED) {
-            throw new Exception("Product not Valid");
-        }
-
-        //Checking Vendor status
-        Vendor vendor = product.getVendor();
-        if (vendor.getStatus() != VendorStatus.APPROVED) {
-            throw new Exception("Vendor status not Approved");
-        }
-
-        //Checking Vendor status
-        Category category = product.getCategory();
-        if (category.isDeleted()) {
-            throw new Exception("Category is not available");
-        }
-
         Set<CartItem> cartItems = cart.getCartItems();
         cartItems.remove(item);
         cartRepository.save(cart);
-        return new CartItemResponse(item);
+        //If Guest User it will return No userId
+        User user = cart.getUser();
+        if(user == null){
+            return new CartItemResponse(item);
+        }
+        return new CartItemResponse(item, user.getId());
     }
 
 }

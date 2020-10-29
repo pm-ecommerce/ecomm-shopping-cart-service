@@ -22,11 +22,11 @@ import java.util.Map;
 
 @Service
 public class CardService implements ICardService {
-    private CardRepository cardRepository;
+    private final CardRepository cardRepository;
 
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
 
-    private TransactionRepository transactionRepository;
+    private final TransactionRepository transactionRepository;
 
     @Autowired
     public CardService(CardRepository cardRepository, AccountRepository accountRepository, TransactionRepository transactionRepository){
