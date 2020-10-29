@@ -19,4 +19,11 @@ public class CartItemResponse {
         this.name = cartItem.getProduct().getName();
         this.cartItemAttributes = cartItem.getAttributes();
     }
+
+//    public CartItemResponse(CartItemRequest request){
+//        this.id = request.getId();
+//        this.quantity = request.getQuantity();
+//        this.name = request.getProduct().getName();
+//        this.cartItemAttributes = request.getAttributes();
+//    }
 }

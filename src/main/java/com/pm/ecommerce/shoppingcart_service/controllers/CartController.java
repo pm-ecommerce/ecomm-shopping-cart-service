@@ -1,8 +1,7 @@
 package com.pm.ecommerce.shoppingcart_service.controllers;
 
 import com.pm.ecommerce.entities.ApiResponse;
-import com.pm.ecommerce.entities.Cart;
-import com.pm.ecommerce.entities.CartItem;
+import com.pm.ecommerce.shoppingcart_service.entities.CartItemRequest;
 import com.pm.ecommerce.shoppingcart_service.entities.CartItemResponse;
 import com.pm.ecommerce.shoppingcart_service.entities.CartResponse;
 import com.pm.ecommerce.shoppingcart_service.services.ICartService;
@@ -57,10 +56,10 @@ public class CartController {
     }
 
     @PostMapping("{sessionId}")
-    public ResponseEntity<ApiResponse<CartResponse>> addToCart(@RequestBody CartItem item, @PathVariable String sessionId) {
-        ApiResponse<CartResponse> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<CartItemResponse>> addToCart(@RequestBody CartItemRequest item, @PathVariable String sessionId) {
+        ApiResponse<CartItemResponse> response = new ApiResponse<>();
         try {
-            CartResponse cartResponse = cartService.addToCart(item, sessionId);
+            CartItemResponse cartResponse = cartService.addToCart(item, sessionId);
             response.setData(cartResponse);
             response.setMessage("Cart Items added!");
         } catch (Exception e) {
@@ -73,10 +72,10 @@ public class CartController {
     }
 
     @PatchMapping("{sessionId}")
-    public ResponseEntity<ApiResponse<CartResponse>> updateProduct(@RequestBody CartItem item, @PathVariable String sessionId){
-        ApiResponse<CartResponse> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<CartItemResponse>> updateCartItems(@RequestBody CartItemRequest item, @PathVariable String sessionId){
+        ApiResponse<CartItemResponse> response = new ApiResponse<>();
         try{
-            CartResponse cartResponse = cartService.updateProduct(item, sessionId);
+            CartItemResponse cartResponse = cartService.updateCartItem(item, sessionId);
             response.setData(cartResponse);
             response.setMessage("Cart Items updated!");
         } catch(Exception e){
@@ -87,11 +86,11 @@ public class CartController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("{sessionId}")
-    public ResponseEntity<ApiResponse<CartItemResponse>> deleteProduct(@RequestBody CartItem item, @PathVariable String sessionId){
+    @DeleteMapping("{sessionId}/{cartItemId}")
+    public ResponseEntity<ApiResponse<CartItemResponse>> deleteCartItem(@PathVariable String sessionId, @PathVariable int cartItemId){
         ApiResponse<CartItemResponse> response = new ApiResponse<>();
         try{
-            CartItemResponse carItemResponse = cartService.deleteProduct(item, sessionId);
+            CartItemResponse carItemResponse = cartService.deleteCartItem(cartItemId, sessionId);
             response.setData(carItemResponse);
             response.setMessage("Cart Item deleted!");
         } catch(Exception e){
