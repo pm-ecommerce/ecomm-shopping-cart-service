@@ -38,7 +38,7 @@ public class CardService implements ICardService {
     public CardResponse addCard(CardRequest cardRequest, int accountId) throws Exception {
         Stripe.apiKey = "sk_test_I8Ora3L8Af2oo9fgBykDOAxj";
         Account account = accountRepository.findById(accountId).orElse(null);
-        if(account == null) throw new Exception("Account Not Found");
+        if (account == null) throw new Exception("Account Not Found");
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", account.getName());
@@ -50,13 +50,13 @@ public class CardService implements ICardService {
         card.setUser(account);
         card.setCustomerId(customer.getId());
 
-        return new CardResponse(cardRepository.save(card)) ;
+        return new CardResponse(cardRepository.save(card));
     }
 
     @Override
     public List<Card> getUserCards(int userId) throws Exception {
         Account account = accountRepository.findById(userId).orElse(null);
-        if(account == null) throw new Exception("User Not Found");
+        if (account == null) throw new Exception("User Not Found");
         return cardRepository.findAllByUser(account);
     }
 
@@ -66,15 +66,15 @@ public class CardService implements ICardService {
 
         Account account = accountRepository.findById(accountId).orElse(null);
 
-        if (account==null) throw new Exception("Account not found");
+        if (account == null) throw new Exception("Account not found");
 
         Card card = cardRepository.findById(cardId).orElse(null);
-        if (card==null) throw new Exception("Card not found");
+        if (card == null) throw new Exception("Card not found");
 
-        if (card.getUser().getId()!=account.getId()) throw new Exception("This card does not belong to this account");
+        if (card.getUser().getId() != account.getId()) throw new Exception("This card does not belong to this account");
 
         Map<String, Object> params = new HashMap<>();
-        params.put("amount", (int) amount*100);
+        params.put("amount", (int) amount * 100);
         params.put("currency", "usd");
         params.put("customer", card.getCustomerId());
         params.put("description", "My First Test Charge (created for API docs)");
@@ -89,7 +89,7 @@ public class CardService implements ICardService {
         return new TransactionResponse(transaction);
     }
 
-    public Card getCardById(int id){
+    public Card getCardById(int id) {
         return cardRepository.findById(id).orElse(null);
     }
 

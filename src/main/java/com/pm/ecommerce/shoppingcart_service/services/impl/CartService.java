@@ -6,25 +6,26 @@ import com.pm.ecommerce.enums.VendorStatus;
 import com.pm.ecommerce.shoppingcart_service.entities.CartItemRequest;
 import com.pm.ecommerce.shoppingcart_service.entities.CartItemResponse;
 import com.pm.ecommerce.shoppingcart_service.entities.CartResponse;
-import com.pm.ecommerce.shoppingcart_service.repositories.CartRepository;
 import com.pm.ecommerce.shoppingcart_service.repositories.CartItemRepository;
+import com.pm.ecommerce.shoppingcart_service.repositories.CartRepository;
 import com.pm.ecommerce.shoppingcart_service.repositories.ProductRepository;
 import com.pm.ecommerce.shoppingcart_service.services.ICartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class CartService implements ICartService {
-
-    private CartRepository cartRepository;
-    private CartItemRepository cartItemRepository;
-    private ProductRepository productRepository;
-
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
+    private final ProductRepository productRepository;
 
     @Autowired
-    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository){
+    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository, ProductRepository productRepository) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
@@ -32,12 +33,11 @@ public class CartService implements ICartService {
 
     @Override
     public CartResponse initiateCart() {
-        // SessionId has to be Unique ->
         String uniqueid = "";
-        while(true){
+        while (true) {
             uniqueid = UUID.randomUUID().toString();
             Cart cart = cartRepository.findBySessionId(uniqueid).orElse(null);
-            if(cart == null){
+            if (cart == null) {
                 break;
             }
         }
@@ -49,9 +49,9 @@ public class CartService implements ICartService {
     @Override
     public List<CartItemResponse> getCartItems(String sessionId) throws Exception {
         Cart cart = cartRepository.findBySessionId(sessionId).orElse(null);
-        if(cart == null) throw new Exception("Cart Not Valid");
+        if (cart == null) throw new Exception("Cart Not Valid");
         List<CartItemResponse> cartItems = new ArrayList<>();
-        for(CartItem item : cart.getCartItems()){
+        for (CartItem item : cart.getCartItems()) {
             CartItemResponse cartItemResponse = new CartItemResponse(item);
             cartItems.add(cartItemResponse);
         }
@@ -60,51 +60,94 @@ public class CartService implements ICartService {
 
     @Override
     public CartItemResponse addToCart(CartItemRequest item, String sessionId) throws Exception {
-        if(item == null) throw new Exception("Item should be not null");
+        if (item == null) {
+            throw new Exception("Item should be not null");
+        }
+
         Cart cart = cartRepository.findBySessionId(sessionId).orElse(null);
-        if(cart == null) throw new Exception("Cart Not Found");
+        if (cart == null) {
+            throw new Exception("Cart Not Found");
+        }
+
         //Checking Product validation
         Product product = productRepository.findById(item.getProductId()).orElse(null);
-        if (product.getStatus() != ProductStatus.PUBLISHED) throw new Exception("Product not Valid");
+        if (product == null || product.getStatus() != ProductStatus.PUBLISHED) {
+            throw new Exception("Product not Valid");
+        }
+
         //Checking Vendor status
         Vendor vendor = product.getVendor();
-        if (vendor.getStatus() != VendorStatus.APPROVED) throw new Exception("Vendor status not Approved");
+        if (vendor == null || vendor.getStatus() != VendorStatus.APPROVED) {
+            throw new Exception("Vendor status not Approved");
+        }
+
         //Checking Vendor status
         Category category = product.getCategory();
-        if (category.isDeleted()) throw new Exception("Category is not available");
+        if (category == null || category.isDeleted()) {
+            throw new Exception("Category is not available");
+        }
+
         //Setting CartItem object
         CartItem cartItem = new CartItem();
         cartItem.setQuantity(item.getQuantity());
         cartItem.setRate(item.getRate());
         cartItem.setProduct(product);
         cartItem.setAttributes(item.getAttributes());
+
         //Adding CartItems
         Set<CartItem> cartItems = cart.getCartItems();
         cartItems.add(cartItem);
         cartRepository.save(cart);
-        return new CartItemResponse(cartItemRepository.save(cartItem));
+
+        // after save
+        // get the cart again
+        // and then get the cart item
+        cart = cartRepository.findById(cart.getId()).orElse(null);
+
+        if (cart != null && cart.getCartItems() != null) {
+            for (CartItem item1 : cart.getCartItems()) {
+                if (item1.getId() > cartItem.getId()) {
+                    cartItem = item1;
+                }
+            }
+        }
+
+        return new CartItemResponse(cartItem);
     }
 
     public CartItemResponse updateCartItem(CartItemRequest item, String sessionId) throws Exception {
         Cart cart = cartRepository.findBySessionId(sessionId).orElse(null);
-        if(cart == null) throw new Exception("Cart Not Found");
-        CartItem cartItem = cartItemRepository.findById(item.getId()).orElse(null);
-        if(cartItem == null) throw new Exception("Cart Item Not Found");
+        if (cart == null) {
+            throw new Exception("Cart Not Found");
+        }
+
+        CartItem cartItem = cart.getCartItems().stream().reduce(null, (a, b) -> b.getId() == item.getId() ? b : a);
+        if (cartItem == null)
+            throw new Exception("Cart Item Not Found");
+
         //Checking Product validation
-        Product product = productRepository.findById(item.getProductId()).orElse(null);
-        if (product.getStatus() != ProductStatus.PUBLISHED) throw new Exception("Product not Valid");
+        Product product = productRepository.findById(cartItem.getProduct().getId()).orElse(null);
+        if (product == null || product.getStatus() != ProductStatus.PUBLISHED) {
+            // delete cart item from cart
+            throw new Exception("Product not Valid");
+        }
+
         //Checking Vendor status
         Vendor vendor = product.getVendor();
-        if (vendor.getStatus() != VendorStatus.APPROVED) throw new Exception("Vendor status not Approved");
+        if (vendor == null || vendor.getStatus() != VendorStatus.APPROVED) {
+            // delete cart item from cart
+            throw new Exception("Vendor status not Approved");
+        }
+
         //Checking Vendor status
         Category category = product.getCategory();
-        if (category.isDeleted()) throw new Exception("Category is not available");
-        Set<CartItem> cartItems = cart.getCartItems();
-        for(CartItem i : cartItems){
-            if(i.equals(item)){
-                i.setQuantity(i.getQuantity() + item.getQuantity());
-            }
+        if (category == null || category.isDeleted()) {
+            // delete cart item from cart
+            throw new Exception("Category is not available");
         }
+
+        cartItem.setQuantity(item.getQuantity());
+
         cartRepository.save(cart);
         return new CartItemResponse(cartItemRepository.save(cartItem));
     }
@@ -112,25 +155,35 @@ public class CartService implements ICartService {
     @Override
     public CartItemResponse deleteCartItem(int cartItemId, String sessionId) throws Exception {
         Cart cart = cartRepository.findBySessionId(sessionId).orElse(null);
-        if(cart == null) throw new Exception("Cart Not Found");
+        if (cart == null) {
+            throw new Exception("Cart Not Found");
+        }
         //Checking Product validation
-        CartItem item = cartItemRepository.findById(cartItemId).orElse(null);
-        if(item == null) throw new Exception("Cart Item Not found");
+        CartItem item = cart.getCartItems().stream().reduce(null, (a, b) -> b.getId() == cartItemId ? b : a);
+        if (item == null) {
+            throw new Exception("Cart Item Not found");
+        }
+
         Product product = item.getProduct();
-        if (product.getStatus() != ProductStatus.PUBLISHED) throw new Exception("Product not Valid");
+        if (product.getStatus() != ProductStatus.PUBLISHED) {
+            throw new Exception("Product not Valid");
+        }
+
         //Checking Vendor status
         Vendor vendor = product.getVendor();
-        if (vendor.getStatus() != VendorStatus.APPROVED) throw new Exception("Vendor status not Approved");
+        if (vendor.getStatus() != VendorStatus.APPROVED) {
+            throw new Exception("Vendor status not Approved");
+        }
+
         //Checking Vendor status
         Category category = product.getCategory();
-        if (category.isDeleted()) throw new Exception("Category is not available");
+        if (category.isDeleted()) {
+            throw new Exception("Category is not available");
+        }
+
         Set<CartItem> cartItems = cart.getCartItems();
-        //Version #1
         cartItems.remove(item);
         cartRepository.save(cart);
-        //Version #2
-//        cartItemRepository.delete(item));
-//        cartRepository.save(cart);
         return new CartItemResponse(item);
     }
 

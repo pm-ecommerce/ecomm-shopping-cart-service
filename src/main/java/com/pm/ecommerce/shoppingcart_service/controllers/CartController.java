@@ -16,7 +16,7 @@ import java.util.List;
 @CrossOrigin
 @RequestMapping("api/cart")
 public class CartController {
-    private ICartService cartService;
+    private final ICartService cartService;
 
     @Autowired
     public CartController(ICartService cartService){
