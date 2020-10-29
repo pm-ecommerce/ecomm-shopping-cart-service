@@ -1,7 +1,5 @@
 package com.pm.ecommerce.shoppingcart_service.services;
 
-import com.pm.ecommerce.entities.Cart;
-import com.pm.ecommerce.entities.CartItem;
 import com.pm.ecommerce.shoppingcart_service.entities.CartItemRequest;
 import com.pm.ecommerce.shoppingcart_service.entities.CartItemResponse;
 import com.pm.ecommerce.shoppingcart_service.entities.CartResponse;

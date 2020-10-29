@@ -12,8 +12,12 @@ import java.util.Optional;
 @Service
 public class AddressService implements IAddressService {
 
+    private final AddressRepository addressRepository;
+
     @Autowired
-    private AddressRepository addressRepository;
+    public AddressService(AddressRepository addressRepository){
+        this.addressRepository = addressRepository;
+    }
 
     public Address registerAddress(Address address) {
         return addressRepository.save(address);

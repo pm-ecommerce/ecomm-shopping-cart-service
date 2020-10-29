@@ -9,6 +9,7 @@ import java.util.Set;
 @Data
 public class CartItemResponse {
     private int id;
+    private int userId;
     private int quantity;
     private String name;
     private Set<CartItemAttribute> cartItemAttributes;
@@ -20,10 +21,11 @@ public class CartItemResponse {
         this.cartItemAttributes = cartItem.getAttributes();
     }
 
-//    public CartItemResponse(CartItemRequest request){
-//        this.id = request.getId();
-//        this.quantity = request.getQuantity();
-//        this.name = request.getProduct().getName();
-//        this.cartItemAttributes = request.getAttributes();
-//    }
+    public CartItemResponse(CartItem cartItem, int userId){
+        this.id = cartItem.getId();
+        this.userId = userId;
+        this.quantity = cartItem.getQuantity();
+        this.name = cartItem.getProduct().getName();
+        this.cartItemAttributes = cartItem.getAttributes();
+    }
 }
