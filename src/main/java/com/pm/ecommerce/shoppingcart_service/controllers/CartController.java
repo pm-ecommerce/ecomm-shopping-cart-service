@@ -23,7 +23,7 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @PostMapping("")
+    @GetMapping("")
     public ResponseEntity<ApiResponse<CartResponse>> initiateCart(){
         ApiResponse<CartResponse> response = new ApiResponse<>();
         try{
