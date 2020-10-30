@@ -23,11 +23,16 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @GetMapping("")
-    public ResponseEntity<ApiResponse<CartResponse>> initiateCart(){
+    @GetMapping(value = {"", "{userId}"})
+    public ResponseEntity<ApiResponse<CartResponse>> initiateCart(@PathVariable(name = "userId") Integer userId){
         ApiResponse<CartResponse> response = new ApiResponse<>();
         try{
-            CartResponse cartResponse = cartService.initiateCart();
+            CartResponse cartResponse;
+            if (userId != null) {
+                cartResponse = cartService.initiateCart(userId);
+            } else {
+                cartResponse = cartService.initiateCart();
+            }
             response.setData(cartResponse);
             response.setMessage("Cart successfully generated");
         } catch(Exception e){

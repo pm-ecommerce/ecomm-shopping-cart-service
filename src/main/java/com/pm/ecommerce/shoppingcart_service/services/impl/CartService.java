@@ -8,6 +8,7 @@ import com.pm.ecommerce.shoppingcart_service.entities.CartItemResponse;
 import com.pm.ecommerce.shoppingcart_service.entities.CartResponse;
 import com.pm.ecommerce.shoppingcart_service.repositories.CartRepository;
 import com.pm.ecommerce.shoppingcart_service.repositories.ProductRepository;
+import com.pm.ecommerce.shoppingcart_service.repositories.UserRepository;
 import com.pm.ecommerce.shoppingcart_service.services.ICartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,32 @@ import java.util.UUID;
 public class CartService implements ICartService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public CartService(CartRepository cartRepository, ProductRepository productRepository) {
+    public CartService(CartRepository cartRepository, ProductRepository productRepository, UserRepository userRepository) {
         this.cartRepository = cartRepository;
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public CartResponse initiateCart(int userId) throws Exception {
+        User user = userRepository.findById(userId).orElse(null);
+        if(user == null ){
+            throw new Exception("User ID not Valid!");
+        }
+        String uniqueid = "";
+        while (true) {
+            uniqueid = UUID.randomUUID().toString();
+            Cart cart = cartRepository.findBySessionId(uniqueid).orElse(null);
+            if (cart == null) {
+                break;
+            }
+        }
+        Cart cart = new Cart();
+        cart.setSessionId(uniqueid);
+        return new CartResponse(cartRepository.save(cart), user.getId());
     }
 
     @Override
@@ -109,7 +131,7 @@ public class CartService implements ICartService {
                 }
             }
         }
-        //If Guest User it will return No userId
+        //If Guest User -> it will return No userId
         User user = cart.getUser();
         if(user == null){
             return new CartItemResponse(cartItem);
