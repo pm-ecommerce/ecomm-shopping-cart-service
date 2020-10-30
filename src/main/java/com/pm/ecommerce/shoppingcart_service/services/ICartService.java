@@ -16,4 +16,6 @@ public interface ICartService {
     CartItemResponse deleteCartItem(int cartItemId, String sessionId) throws Exception;
 
     CartResponse initiateCart();
+
+    CartResponse initiateCart(int userId) throws Exception;
 }
