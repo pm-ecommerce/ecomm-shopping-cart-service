@@ -45,6 +45,23 @@ public class CartController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("{sessionId}")
+    public ResponseEntity<ApiResponse<CartResponse>> updateUserSession(
+            @RequestBody UserRequest userRequest, @PathVariable(name = "sessionId") String sessionId){
+        ApiResponse<CartResponse> response = new ApiResponse<>();
+        try{
+            CartResponse cartResponse = cartService.updateUserSession(userRequest.getUserId(), sessionId);
+            response.setData(cartResponse);
+            response.setMessage("User's Cart Item Successfully updated with Guest's cart item");
+        } catch(Exception e){
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("{sessionId}")
     public ResponseEntity<ApiResponse<List<CartItemResponse>>> viewCartItems(@PathVariable(name = "sessionId") String sessionId){
         ApiResponse<List<CartItemResponse>> response = new ApiResponse<>();
