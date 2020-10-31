@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface IAddressService {
 
-    Address registerAddress(Address address);
+    Address saveAddress(Address address, Integer userId) throws Exception;
 
     List<Address> getAllAddresses();
 
@@ -14,5 +14,7 @@ public interface IAddressService {
 
     void deleteById(int addressId);
 
-    void saveAddressByUserId(Integer addressId, Integer userId);
+    Address updateAddress(Address address, Integer addressId) throws Exception;
+
+    Address deleteAddress(Integer userId, Integer addressId) throws Exception;
 }

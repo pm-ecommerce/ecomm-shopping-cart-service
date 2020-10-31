@@ -24,21 +24,17 @@ public class AddressController {
     }
 
     @PostMapping("/{userId}")
-    public ResponseEntity<ApiResponse<Address>> registerAddress(@RequestBody Address postData, @PathVariable Integer userId) {
+    public ResponseEntity<ApiResponse<Address>> registerAddress(@RequestBody Address postData, @PathVariable Integer userId) throws Exception {
         ApiResponse<Address> response = new ApiResponse<>();
-
-
-//        Address address = addressService.registerAddress(postData);
-//        try {
-            Address address = addressService.registerAddress(postData);
-            addressService.saveAddressByUserId(address.getId(), userId);
+        try {
+            Address address = addressService.saveAddress(postData,userId);
             response.setData(address);
             response.setMessage("Address registered successfully.");
-//        } catch (Exception e) {
-//            response.setStatus(500);
-//            response.setMessage(e.getMessage());
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-//        }
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -49,12 +45,10 @@ public class AddressController {
 
 
     @PatchMapping("/{addressId}")
-    public ResponseEntity<ApiResponse<Address>> updateAddress(@RequestBody Address updateAddress){
+    public ResponseEntity<ApiResponse<Address>> updateAddress(@RequestBody Address updateAddress,@PathVariable Integer addressId){
         ApiResponse<Address> response = new ApiResponse<>();
-
         try {
-            Address address = addressService.registerAddress(updateAddress);
-
+            Address address = addressService.updateAddress(updateAddress,addressId);
             response.setData(address);
             response.setMessage("Address registered successfully.");
         } catch (Exception e) {
@@ -66,12 +60,11 @@ public class AddressController {
     }
 
     @DeleteMapping("/{userId}/{addressId}")
-    public ResponseEntity<ApiResponse<Address>> deleteAddress(@PathVariable int addressId){
+    public ResponseEntity<ApiResponse<Address>> deleteAddress(@PathVariable int userId,@PathVariable int addressId){
         ApiResponse<Address> response = new ApiResponse<>();
 
         try {
-            Address address = addressService.findById(addressId);
-            addressService.deleteById(addressId);
+            Address address =  addressService.deleteAddress(userId,addressId);
             response.setData(address);
             response.setMessage("Deleted address id - " + addressId);
         } catch (Exception e) {
