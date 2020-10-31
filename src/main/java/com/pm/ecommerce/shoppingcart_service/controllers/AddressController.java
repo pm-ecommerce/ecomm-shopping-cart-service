@@ -2,6 +2,8 @@ package com.pm.ecommerce.shoppingcart_service.controllers;
 
 import com.pm.ecommerce.entities.Address;
 import com.pm.ecommerce.entities.ApiResponse;
+import com.pm.ecommerce.entities.User;
+import com.pm.ecommerce.shoppingcart_service.entities.CartItemResponse;
 import com.pm.ecommerce.shoppingcart_service.services.IAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +14,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/api/address")
+@RequestMapping("/api/addresses")
 public class AddressController {
 
     private IAddressService addressService;
@@ -22,13 +24,11 @@ public class AddressController {
         this.addressService = addressService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Address>> registerAddress(@RequestBody Address postData) {
+    @PostMapping("/{userId}")
+    public ResponseEntity<ApiResponse<Address>> registerAddress(@RequestBody Address postData, @PathVariable Integer userId) throws Exception {
         ApiResponse<Address> response = new ApiResponse<>();
-
         try {
-            Address address = addressService.registerAddress(postData);
-
+            Address address = addressService.saveAddress(postData,userId);
             response.setData(address);
             response.setMessage("Address registered successfully.");
         } catch (Exception e) {
@@ -39,35 +39,28 @@ public class AddressController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/all")
-    public List<Address> getAllAddresses() {
-        return addressService.getAllAddresses();
-    }
-
-    @GetMapping("/{addressId}")
-    public ResponseEntity<ApiResponse<Address>> getAddressId(@PathVariable int addressId) {
-        ApiResponse<Address> response = new ApiResponse<>();
-
-        try {
-            Address address = addressService.findById(addressId);
-            address.setId(0);
-            response.setData(address);
-            response.setMessage("Get address by id");
-        } catch (Exception e) {
+    @GetMapping("/{userId}")
+    public ResponseEntity<ApiResponse<List<Address>>> getAllAddress(@PathVariable Integer userId){
+        ApiResponse<List<Address>> response = new ApiResponse<>();
+        try{
+            List<Address> addresses = addressService.getAllAddresses(userId);
+            response.setData(addresses);
+            response.setMessage("List of Addresses");
+        } catch(Exception e){
             response.setStatus(500);
             response.setMessage(e.getMessage());
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/updateAddress")
-    public ResponseEntity<ApiResponse<Address>> updateAddress(@RequestBody Address updateAddress){
+
+    @PatchMapping("/{addressId}")
+    public ResponseEntity<ApiResponse<Address>> updateAddress(@RequestBody Address updateAddress,@PathVariable Integer addressId){
         ApiResponse<Address> response = new ApiResponse<>();
-
         try {
-            Address address = addressService.registerAddress(updateAddress);
-
+            Address address = addressService.updateAddress(updateAddress,addressId);
             response.setData(address);
             response.setMessage("Address registered successfully.");
         } catch (Exception e) {
@@ -78,14 +71,12 @@ public class AddressController {
         return ResponseEntity.ok(response);
     }
 
-
-    @DeleteMapping("/{addressId}")
-    public ResponseEntity<ApiResponse<Address>> deleteAddress(@PathVariable int addressId){
+    @DeleteMapping("/{userId}/{addressId}")
+    public ResponseEntity<ApiResponse<Address>> deleteAddress(@PathVariable int userId, @PathVariable int addressId){
         ApiResponse<Address> response = new ApiResponse<>();
 
         try {
-            Address address = addressService.findById(addressId);
-            addressService.deleteById(addressId);
+            Address address =  addressService.deleteAddress(userId,addressId);
             response.setData(address);
             response.setMessage("Deleted address id - " + addressId);
         } catch (Exception e) {
