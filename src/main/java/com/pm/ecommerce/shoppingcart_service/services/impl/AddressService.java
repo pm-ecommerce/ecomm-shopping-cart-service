@@ -45,7 +45,6 @@ public class AddressService implements IAddressService {
         if (existingUser == null) throw new Exception("User not found");
         List<Address> addressList = addressRepository.findAllById(userId);
         return addressList;
-
     }
 
     @Override
