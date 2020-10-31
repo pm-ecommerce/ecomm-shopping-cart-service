@@ -1,5 +1,6 @@
 package com.pm.ecommerce.shoppingcart_service.services.impl;
 
+import com.pm.ecommerce.entities.Account;
 import com.pm.ecommerce.entities.Address;
 import com.pm.ecommerce.entities.User;
 import com.pm.ecommerce.shoppingcart_service.repositories.AddressRepository;
@@ -8,6 +9,7 @@ import com.pm.ecommerce.shoppingcart_service.services.IAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,14 +23,14 @@ public class AddressService implements IAddressService {
     private UserRepository userRepository;
 
     @Autowired
-    public AddressService(AddressRepository addressRepository){
+    public AddressService(AddressRepository addressRepository) {
         this.addressRepository = addressRepository;
     }
 
     public Address saveAddress(Address address, Integer userId) throws Exception {
         User existingUser = userRepository.findById(userId).orElse(null);
-        if(address==null) throw new Exception("Address is empty");
-        if(existingUser==null) throw new Exception("User not found");
+        if (address == null) throw new Exception("Address is empty");
+        if (existingUser == null) throw new Exception("User not found");
         Address newAddress = addressRepository.save(address);
         List<Address> addressList = existingUser.getAddresses();
         addressList.add(newAddress);
@@ -38,8 +40,12 @@ public class AddressService implements IAddressService {
     }
 
     @Override
-    public List<Address> getAllAddresses() {
-        return addressRepository.findAll();
+    public List<Address> getAllAddresses(Integer userId) throws Exception {
+        User existingUser = userRepository.findById(userId).orElse(null);
+        if (existingUser == null) throw new Exception("User not found");
+        List<Address> addressList = addressRepository.findAllById(userId);
+        return addressList;
+
     }
 
     @Override
@@ -47,7 +53,7 @@ public class AddressService implements IAddressService {
         Optional<Address> result = addressRepository.findById(addressId);
 
         Address address = new Address();
-        if(result.isPresent()) {
+        if (result.isPresent()) {
             address = result.get();
         } else {
             throw new RuntimeException("Did not find by address id - " + addressId);
@@ -63,16 +69,16 @@ public class AddressService implements IAddressService {
     @Override
     public Address updateAddress(Address newAddress, Integer addressId) throws Exception {
         Address address = addressRepository.findById(addressId).orElse(null);
-        if(address==null) throw new Exception("Address does not exist");
+        if (address == null) throw new Exception("Address does not exist");
         newAddress.setId(addressId);
         return addressRepository.save(newAddress);
     }
 
     public Address deleteAddress(Integer userId, Integer addressId) throws Exception {
         Address address = addressRepository.findById(addressId).orElse(null);
-        if(address==null) throw new Exception("Address does not exist");
+        if (address == null) throw new Exception("Address does not exist");
         User user = userRepository.findById(userId).orElse(null);
-        if(user==null) throw new Exception("User does not exist");
+        if (user == null) throw new Exception("User does not exist");
         List<Address> addressList = user.getAddresses();
         addressList.remove(address);
         addressRepository.delete(address);
