@@ -4,6 +4,7 @@ import com.pm.ecommerce.entities.ApiResponse;
 import com.pm.ecommerce.shoppingcart_service.entities.CartItemRequest;
 import com.pm.ecommerce.shoppingcart_service.entities.CartItemResponse;
 import com.pm.ecommerce.shoppingcart_service.entities.CartResponse;
+import com.pm.ecommerce.shoppingcart_service.entities.UserRequest;
 import com.pm.ecommerce.shoppingcart_service.services.ICartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,15 +24,15 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @GetMapping(value = {"", "{userId}"})
-    public ResponseEntity<ApiResponse<CartResponse>> initiateCart(@PathVariable(name = "userId") Integer userId){
+    @PostMapping("")
+    public ResponseEntity<ApiResponse<CartResponse>> initiateCart(@RequestBody UserRequest userRequest){
         ApiResponse<CartResponse> response = new ApiResponse<>();
         try{
             CartResponse cartResponse;
-            if (userId != null) {
-                cartResponse = cartService.initiateCart(userId);
-            } else {
+            if (userRequest == null || userRequest.getUserId() == null) {
                 cartResponse = cartService.initiateCart();
+            } else {
+                cartResponse = cartService.initiateCart(userRequest.getUserId());
             }
             response.setData(cartResponse);
             response.setMessage("Cart successfully generated");
