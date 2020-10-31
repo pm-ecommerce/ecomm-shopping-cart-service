@@ -47,6 +47,7 @@ public class CartService implements ICartService {
         }
         Cart cart = new Cart();
         cart.setSessionId(uniqueid);
+        cart.setUser(user);
         return new CartResponse(cartRepository.save(cart), user.getId());
     }
 
