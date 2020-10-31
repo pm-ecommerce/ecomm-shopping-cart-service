@@ -11,20 +11,23 @@ public class CartItemResponse {
     private int id;
     private int userId;
     private int quantity;
+    private double rate;
     private String name;
     private Set<CartItemAttribute> cartItemAttributes;
 
-    public CartItemResponse(CartItem cartItem){
+    public CartItemResponse(CartItem cartItem) {
         this.id = cartItem.getId();
         this.quantity = cartItem.getQuantity();
+        this.rate = cartItem.getRate();
         this.name = cartItem.getProduct().getName();
         this.cartItemAttributes = cartItem.getAttributes();
     }
 
-    public CartItemResponse(CartItem cartItem, int userId){
+    public CartItemResponse(CartItem cartItem, int userId) {
         this.id = cartItem.getId();
         this.userId = userId;
         this.quantity = cartItem.getQuantity();
+        this.rate = cartItem.getRate();
         this.name = cartItem.getProduct().getName();
         this.cartItemAttributes = cartItem.getAttributes();
     }
