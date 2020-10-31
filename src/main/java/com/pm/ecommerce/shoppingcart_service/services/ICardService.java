@@ -11,13 +11,13 @@ import com.stripe.exception.StripeException;
 import java.util.List;
 
 public interface ICardService {
-    Card deleteCard(int cardId);
+    CardResponse deleteCard(int cardId);
 
     Card getCardById(int id);
 
     CardResponse addCard(CardRequest card, int accountId) throws Exception;
 
-    List<Card> getUserCards(int userId) throws Exception;
+    List<CardResponse> getUserCards(int userId) throws Exception;
 
     TransactionResponse chargeCard(int accountId, int cardId, double amount) throws Exception;
 }

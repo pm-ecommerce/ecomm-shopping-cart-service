@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CardService implements ICardService {
@@ -54,10 +55,11 @@ public class CardService implements ICardService {
     }
 
     @Override
-    public List<Card> getUserCards(int userId) throws Exception {
+    public List<CardResponse> getUserCards(int userId) throws Exception {
         Account account = accountRepository.findById(userId).orElse(null);
         if (account == null) throw new Exception("User Not Found");
-        return cardRepository.findAllByUser(account);
+//        return cardRepository.findAllByUser(account);
+        return cardRepository.findAllByUser(account).stream().map(x -> new CardResponse(x)).collect(Collectors.toList());
     }
 
     @Override
@@ -94,9 +96,9 @@ public class CardService implements ICardService {
     }
 
     @Override
-    public Card deleteCard(int cardId) {
+    public CardResponse deleteCard(int cardId) {
         Card card = getCardById(cardId);
         cardRepository.delete(card);
-        return card;
+        return new CardResponse(card);
     }
 }

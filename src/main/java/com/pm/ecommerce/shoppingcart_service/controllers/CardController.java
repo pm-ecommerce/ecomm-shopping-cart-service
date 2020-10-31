@@ -43,10 +43,10 @@ public class CardController {
     }
 
     @DeleteMapping("{cardId}")
-    public ResponseEntity<ApiResponse<Card>> deleteCard(@PathVariable int cardId) {
-        ApiResponse<Card> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<CardResponse>> deleteCard(@PathVariable int cardId) {
+        ApiResponse<CardResponse> response = new ApiResponse<>();
         try {
-            Card card = cardService.deleteCard(cardId);
+            CardResponse card = cardService.deleteCard(cardId);
             response.setMessage("Card Successfully Deleted");
             response.setData(card);
         } catch (Exception e) {
@@ -59,10 +59,10 @@ public class CardController {
     }
 
     @GetMapping("{userId}")
-    public ResponseEntity<ApiResponse<List<Card>>> getCards(@PathVariable int userId) {
-        ApiResponse<List<Card>> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<List<CardResponse>>> getCards(@PathVariable int userId) {
+        ApiResponse<List<CardResponse>> response = new ApiResponse<>();
         try {
-            List<Card> cards = cardService.getUserCards(userId);
+            List<CardResponse> cards = cardService.getUserCards(userId);
             response.setData(cards);
             response.setMessage("Card List");
 
