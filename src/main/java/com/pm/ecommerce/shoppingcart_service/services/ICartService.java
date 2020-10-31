@@ -18,4 +18,6 @@ public interface ICartService {
     CartResponse initiateCart();
 
     CartResponse initiateCart(int userId) throws Exception;
+
+    CartResponse updateUserSession(int userId, String sessionId) throws Exception;
 }
