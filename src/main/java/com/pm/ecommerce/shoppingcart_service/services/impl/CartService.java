@@ -66,7 +66,7 @@ public class CartService implements ICartService {
             throw new Exception("User ID not Valid!");
         }
         guestCart.setUser(user);
-        return new CartResponse(cartRepository.save(guestCart));
+        return new CartResponse(cartRepository.save(guestCart), userId);
     }
 
     @Override
