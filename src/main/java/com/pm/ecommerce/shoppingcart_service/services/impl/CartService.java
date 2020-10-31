@@ -47,7 +47,26 @@ public class CartService implements ICartService {
         }
         Cart cart = new Cart();
         cart.setSessionId(uniqueid);
+        cart.setUser(user);
         return new CartResponse(cartRepository.save(cart), user.getId());
+    }
+
+    @Override
+    public CartResponse updateUserSession(int userId, String sessionId) throws Exception {
+        //take CartItem's from the sessionId
+        //find User by id
+        //take user's cart
+        //and add items
+        Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
+        if (guestCart == null) {
+            throw new Exception("Cart Not Found");
+        }
+        User user = userRepository.findById(userId).orElse(null);
+        if(user == null ){
+            throw new Exception("User ID not Valid!");
+        }
+        guestCart.setUser(user);
+        return new CartResponse(cartRepository.save(guestCart));
     }
 
     @Override
