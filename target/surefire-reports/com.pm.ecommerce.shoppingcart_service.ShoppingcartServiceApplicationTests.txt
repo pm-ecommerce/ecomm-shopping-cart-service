@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.pm.ecommerce.shoppingcart_service.ShoppingcartServiceApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 22.627 s - in com.pm.ecommerce.shoppingcart_service.ShoppingcartServiceApplicationTests

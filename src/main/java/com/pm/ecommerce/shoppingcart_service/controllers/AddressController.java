@@ -3,6 +3,7 @@ package com.pm.ecommerce.shoppingcart_service.controllers;
 import com.pm.ecommerce.entities.Address;
 import com.pm.ecommerce.entities.ApiResponse;
 import com.pm.ecommerce.entities.User;
+import com.pm.ecommerce.shoppingcart_service.entities.CartItemResponse;
 import com.pm.ecommerce.shoppingcart_service.services.IAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,8 +40,19 @@ public class AddressController {
     }
 
     @GetMapping("/{userId}")
-    public List<Address> getAllAddresses() {
-        return addressService.getAllAddresses();
+    public ResponseEntity<ApiResponse<List<Address>>> getAllAddress(@PathVariable Integer userId){
+        ApiResponse<List<Address>> response = new ApiResponse<>();
+        try{
+            List<Address> addresses = addressService.getAllAddresses(userId);
+            response.setData(addresses);
+            response.setMessage("List of Addresses");
+        } catch(Exception e){
+            response.setStatus(500);
+            response.setMessage(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+        return ResponseEntity.ok(response);
     }
 
 
@@ -60,7 +72,7 @@ public class AddressController {
     }
 
     @DeleteMapping("/{userId}/{addressId}")
-    public ResponseEntity<ApiResponse<Address>> deleteAddress(@PathVariable int userId,@PathVariable int addressId){
+    public ResponseEntity<ApiResponse<Address>> deleteAddress(@PathVariable int userId, @PathVariable int addressId){
         ApiResponse<Address> response = new ApiResponse<>();
 
         try {
