@@ -45,7 +45,7 @@ public class CartController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("{sessionId}")
+    @PatchMapping("{sessionId}/user")
     public ResponseEntity<ApiResponse<CartResponse>> updateUserSession(
             @RequestBody UserRequest userRequest, @PathVariable(name = "sessionId") String sessionId){
         ApiResponse<CartResponse> response = new ApiResponse<>();
