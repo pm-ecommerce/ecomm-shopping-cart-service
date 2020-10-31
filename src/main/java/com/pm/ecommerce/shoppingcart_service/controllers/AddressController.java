@@ -2,6 +2,7 @@ package com.pm.ecommerce.shoppingcart_service.controllers;
 
 import com.pm.ecommerce.entities.Address;
 import com.pm.ecommerce.entities.ApiResponse;
+import com.pm.ecommerce.entities.User;
 import com.pm.ecommerce.shoppingcart_service.services.IAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/api/address")
+@RequestMapping("/api/addresses")
 public class AddressController {
 
     private IAddressService addressService;
@@ -22,46 +23,32 @@ public class AddressController {
         this.addressService = addressService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Address>> registerAddress(@RequestBody Address postData) {
+    @PostMapping("/{userId}")
+    public ResponseEntity<ApiResponse<Address>> registerAddress(@RequestBody Address postData, @PathVariable Integer userId) {
         ApiResponse<Address> response = new ApiResponse<>();
 
-        try {
-            Address address = addressService.registerAddress(postData);
 
+//        Address address = addressService.registerAddress(postData);
+//        try {
+            Address address = addressService.registerAddress(postData);
+            addressService.saveAddressByUserId(address.getId(), userId);
             response.setData(address);
             response.setMessage("Address registered successfully.");
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.setMessage(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+//        } catch (Exception e) {
+//            response.setStatus(500);
+//            response.setMessage(e.getMessage());
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+//        }
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/{userId}")
     public List<Address> getAllAddresses() {
         return addressService.getAllAddresses();
     }
 
-    @GetMapping("/{addressId}")
-    public ResponseEntity<ApiResponse<Address>> getAddressId(@PathVariable int addressId) {
-        ApiResponse<Address> response = new ApiResponse<>();
 
-        try {
-            Address address = addressService.findById(addressId);
-            address.setId(0);
-            response.setData(address);
-            response.setMessage("Get address by id");
-        } catch (Exception e) {
-            response.setStatus(500);
-            response.setMessage(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/updateAddress")
+    @PatchMapping("/{addressId}")
     public ResponseEntity<ApiResponse<Address>> updateAddress(@RequestBody Address updateAddress){
         ApiResponse<Address> response = new ApiResponse<>();
 
@@ -78,8 +65,7 @@ public class AddressController {
         return ResponseEntity.ok(response);
     }
 
-
-    @DeleteMapping("/{addressId}")
+    @DeleteMapping("/{userId}/{addressId}")
     public ResponseEntity<ApiResponse<Address>> deleteAddress(@PathVariable int addressId){
         ApiResponse<Address> response = new ApiResponse<>();
 

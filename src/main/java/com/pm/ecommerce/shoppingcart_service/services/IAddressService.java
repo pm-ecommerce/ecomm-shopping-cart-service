@@ -13,4 +13,6 @@ public interface IAddressService {
     Address findById(int addressId);
 
     void deleteById(int addressId);
+
+    void saveAddressByUserId(Integer addressId, Integer userId);
 }

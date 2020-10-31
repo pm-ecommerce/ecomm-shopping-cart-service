@@ -2,6 +2,7 @@ package com.pm.ecommerce.shoppingcart_service.services.impl;
 
 import com.pm.ecommerce.entities.Address;
 import com.pm.ecommerce.shoppingcart_service.repositories.AddressRepository;
+import com.pm.ecommerce.shoppingcart_service.repositories.UserRepository;
 import com.pm.ecommerce.shoppingcart_service.services.IAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,11 @@ import java.util.Optional;
 @Service
 public class AddressService implements IAddressService {
 
+    @Autowired
     private final AddressRepository addressRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     public AddressService(AddressRepository addressRepository){
@@ -44,6 +49,11 @@ public class AddressService implements IAddressService {
     @Override
     public void deleteById(int addressId) {
         addressRepository.deleteById(addressId);
+    }
+
+    @Override
+    public void saveAddressByUserId(Integer addressId, Integer userId) {
+        userRepository.saveAddressByUserId(addressId, userId);
     }
 
 }
