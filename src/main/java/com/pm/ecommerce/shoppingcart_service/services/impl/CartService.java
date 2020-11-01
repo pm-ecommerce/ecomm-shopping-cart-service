@@ -154,12 +154,8 @@ public class CartService implements ICartService {
                 }
             }
         }
-        //If Guest User -> it will return No userId
-        User user = cart.getUser();
-        if(user == null){
-            return new CartItemResponse(cartItem);
-        }
-        return new CartItemResponse(cartItem, user.getId());
+
+        return new CartItemResponse(cartItem);
     }
 
     public CartItemResponse updateCartItem(CartItemRequest item, String sessionId) throws Exception {
@@ -196,12 +192,7 @@ public class CartService implements ICartService {
         cartItem.setQuantity(item.getQuantity());
 
         cartRepository.save(cart);
-        //If Guest User it will return No userId
-        User user = cart.getUser();
-        if(user == null){
-            return new CartItemResponse(cartItem);
-        }
-        return new CartItemResponse(cartItem, user.getId());
+        return new CartItemResponse(cartItem);
     }
 
     @Override
@@ -219,12 +210,7 @@ public class CartService implements ICartService {
         Set<CartItem> cartItems = cart.getCartItems();
         cartItems.remove(item);
         cartRepository.save(cart);
-        //If Guest User it will return No userId
-        User user = cart.getUser();
-        if(user == null){
-            return new CartItemResponse(item);
-        }
-        return new CartItemResponse(item, user.getId());
+        return new CartItemResponse(item);
     }
 
 }
