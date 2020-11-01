@@ -58,8 +58,7 @@ public class CardService implements ICardService {
     public List<CardResponse> getUserCards(int userId) throws Exception {
         Account account = accountRepository.findById(userId).orElse(null);
         if (account == null) throw new Exception("User Not Found");
-//        return cardRepository.findAllByUser(account);
-        return cardRepository.findAllByUser(account).stream().map(x -> new CardResponse(x)).collect(Collectors.toList());
+        return cardRepository.findAllByUser(account).stream().map(CardResponse::new).collect(Collectors.toList());
     }
 
     @Override

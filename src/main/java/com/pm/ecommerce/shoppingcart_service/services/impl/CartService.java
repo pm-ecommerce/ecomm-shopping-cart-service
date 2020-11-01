@@ -13,10 +13,10 @@ import com.pm.ecommerce.shoppingcart_service.services.ICartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CartService implements ICartService {
@@ -92,13 +92,7 @@ public class CartService implements ICartService {
     public List<CartItemResponse> getCartItems(String sessionId) throws Exception {
         Cart cart = cartRepository.findBySessionId(sessionId).orElse(null);
         if (cart == null) throw new Exception("Cart Not Valid");
-        List<CartItemResponse> cartItems = new ArrayList<>();
-        for (CartItem item : cart.getCartItems()) {
-            CartItemResponse cartItemResponse = new CartItemResponse(item);
-//            cartItemResponse.setUserId(cart.getUser().getId());
-            cartItems.add(cartItemResponse);
-        }
-        return cartItems;
+        return cart.getCartItems().stream().map(CartItemResponse::new).collect(Collectors.toList());
     }
 
     @Override
