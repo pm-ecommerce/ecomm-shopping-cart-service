@@ -34,7 +34,6 @@ public class AddressService implements IAddressService {
         Address newAddress = addressRepository.save(address);
         List<Address> addressList = existingUser.getAddresses();
         addressList.add(newAddress);
-        existingUser.setAddresses(addressList);
         userRepository.save(existingUser);
         return newAddress;
     }
@@ -43,8 +42,7 @@ public class AddressService implements IAddressService {
     public List<Address> getAllAddresses(Integer userId) throws Exception {
         User existingUser = userRepository.findById(userId).orElse(null);
         if (existingUser == null) throw new Exception("User not found");
-        List<Address> addressList = addressRepository.findAllById(userId);
-        return addressList;
+        return existingUser.getAddresses();
     }
 
     @Override
