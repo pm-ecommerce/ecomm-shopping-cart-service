@@ -39,7 +39,7 @@ public class CartService implements ICartService {
         }
         Cart userCart = cartRepository.findByUserId(userId).orElse(null);
         if(userCart != null){
-            return new CartResponse(userCart);
+            return new CartResponse(userCart, userId);
         }
         String uniqueid = "";
         while (true) {
