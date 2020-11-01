@@ -37,6 +37,10 @@ public class CartService implements ICartService {
         if(user == null ){
             throw new Exception("User ID not Valid!");
         }
+        Cart userCart = cartRepository.findByUserId(userId).orElse(null);
+        if(userCart != null){
+            return new CartResponse(userCart, userId);
+        }
         String uniqueid = "";
         while (true) {
             uniqueid = UUID.randomUUID().toString();
