@@ -13,10 +13,10 @@ import com.pm.ecommerce.shoppingcart_service.services.ICartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CartService implements ICartService {
@@ -36,6 +36,10 @@ public class CartService implements ICartService {
         User user = userRepository.findById(userId).orElse(null);
         if(user == null ){
             throw new Exception("User ID not Valid!");
+        }
+        Cart userCart = cartRepository.findByUserId(userId).orElse(null);
+        if(userCart != null){
+            return new CartResponse(userCart, userId);
         }
         String uniqueid = "";
         while (true) {
@@ -88,13 +92,7 @@ public class CartService implements ICartService {
     public List<CartItemResponse> getCartItems(String sessionId) throws Exception {
         Cart cart = cartRepository.findBySessionId(sessionId).orElse(null);
         if (cart == null) throw new Exception("Cart Not Valid");
-        List<CartItemResponse> cartItems = new ArrayList<>();
-        for (CartItem item : cart.getCartItems()) {
-            CartItemResponse cartItemResponse = new CartItemResponse(item);
-//            cartItemResponse.setUserId(cart.getUser().getId());
-            cartItems.add(cartItemResponse);
-        }
-        return cartItems;
+        return cart.getCartItems().stream().map(CartItemResponse::new).collect(Collectors.toList());
     }
 
     @Override
@@ -150,12 +148,8 @@ public class CartService implements ICartService {
                 }
             }
         }
-        //If Guest User -> it will return No userId
-        User user = cart.getUser();
-        if(user == null){
-            return new CartItemResponse(cartItem);
-        }
-        return new CartItemResponse(cartItem, user.getId());
+
+        return new CartItemResponse(cartItem);
     }
 
     public CartItemResponse updateCartItem(CartItemRequest item, String sessionId) throws Exception {
@@ -192,12 +186,7 @@ public class CartService implements ICartService {
         cartItem.setQuantity(item.getQuantity());
 
         cartRepository.save(cart);
-        //If Guest User it will return No userId
-        User user = cart.getUser();
-        if(user == null){
-            return new CartItemResponse(cartItem);
-        }
-        return new CartItemResponse(cartItem, user.getId());
+        return new CartItemResponse(cartItem);
     }
 
     @Override
@@ -215,12 +204,7 @@ public class CartService implements ICartService {
         Set<CartItem> cartItems = cart.getCartItems();
         cartItems.remove(item);
         cartRepository.save(cart);
-        //If Guest User it will return No userId
-        User user = cart.getUser();
-        if(user == null){
-            return new CartItemResponse(item);
-        }
-        return new CartItemResponse(item, user.getId());
+        return new CartItemResponse(item);
     }
 
 }
