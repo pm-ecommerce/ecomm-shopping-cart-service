@@ -1,6 +1,5 @@
 package com.pm.ecommerce.shoppingcart_service.services.impl;
 
-import com.pm.ecommerce.entities.Account;
 import com.pm.ecommerce.entities.Address;
 import com.pm.ecommerce.entities.User;
 import com.pm.ecommerce.shoppingcart_service.repositories.AddressRepository;
@@ -9,7 +8,6 @@ import com.pm.ecommerce.shoppingcart_service.services.IAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,11 +29,22 @@ public class AddressService implements IAddressService {
         User existingUser = userRepository.findById(userId).orElse(null);
         if (address == null) throw new Exception("Address is empty");
         if (existingUser == null) throw new Exception("User not found");
-        Address newAddress = addressRepository.save(address);
         List<Address> addressList = existingUser.getAddresses();
-        addressList.add(newAddress);
+        address.setCountry("US");
+        addressList.add(address);
         userRepository.save(existingUser);
-        return newAddress;
+
+        existingUser = userRepository.findById(userId).orElse(null);
+
+        if (existingUser != null && existingUser.getAddresses() != null) {
+            for (Address item1 : existingUser.getAddresses()) {
+                if (item1.getId() > address.getId()) {
+                    address = item1;
+                }
+            }
+        }
+
+        return address;
     }
 
     @Override

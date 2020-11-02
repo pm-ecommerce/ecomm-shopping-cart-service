@@ -14,6 +14,7 @@ import com.stripe.Stripe;
 import com.stripe.model.Charge;
 import com.stripe.model.Customer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -29,15 +30,18 @@ public class CardService implements ICardService {
 
     private final TransactionRepository transactionRepository;
 
+    @Value("${stripe.apiKey:sk_test_I8Ora3L8Af2oo9fgBykDOAxj}")
+    private String apikey;
+
     @Autowired
-    public CardService(CardRepository cardRepository, AccountRepository accountRepository, TransactionRepository transactionRepository){
+    public CardService(CardRepository cardRepository, AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.cardRepository = cardRepository;
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
     }
 
     public CardResponse addCard(CardRequest cardRequest, int accountId) throws Exception {
-        Stripe.apiKey = "sk_test_I8Ora3L8Af2oo9fgBykDOAxj";
+        Stripe.apiKey = apikey;
         Account account = accountRepository.findById(accountId).orElse(null);
         if (account == null) throw new Exception("Account Not Found");
 
@@ -57,14 +61,15 @@ public class CardService implements ICardService {
     @Override
     public List<CardResponse> getUserCards(int userId) throws Exception {
         Account account = accountRepository.findById(userId).orElse(null);
-        if (account == null) throw new Exception("User Not Found");
-//        return cardRepository.findAllByUser(account);
-        return cardRepository.findAllByUser(account).stream().map(x -> new CardResponse(x)).collect(Collectors.toList());
+        if (account == null) {
+            throw new Exception("User Not Found");
+        }
+        return cardRepository.findAllByUser(account).stream().map(CardResponse::new).collect(Collectors.toList());
     }
 
     @Override
     public TransactionResponse chargeCard(int accountId, int cardId, double amount) throws Exception {
-        Stripe.apiKey = "sk_test_I8Ora3L8Af2oo9fgBykDOAxj";
+        Stripe.apiKey = apikey;
 
         Account account = accountRepository.findById(accountId).orElse(null);
 
