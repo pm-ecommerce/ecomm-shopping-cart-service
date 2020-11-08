@@ -30,7 +30,7 @@ public class CardService implements ICardService {
 
     private final TransactionRepository transactionRepository;
 
-    @Value("${stripe.apiKey:sk_test_I8Ora3L8Af2oo9fgBykDOAxj}")
+    @Value("${stripe.apiKey}")
     private String apikey;
 
     @Autowired
