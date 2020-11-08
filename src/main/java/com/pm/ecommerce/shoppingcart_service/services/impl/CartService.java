@@ -13,6 +13,7 @@ import com.pm.ecommerce.shoppingcart_service.services.ICartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -33,44 +34,80 @@ public class CartService implements ICartService {
 
     @Override
     public CartResponse initiateCart(int userId) throws Exception {
-        User user = userRepository.findById(userId).orElse(null);
-        if(user == null ){
-            throw new Exception("User ID not Valid!");
+        Cart cart = new Cart();
+        if (userId > 0) {
+            User user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                throw new Exception("User ID not Valid!");
+            }
+            cart.setUser(user);
         }
+
         Cart userCart = cartRepository.findByUserId(userId).orElse(null);
-        if(userCart != null){
+        if (userCart != null) {
             return new CartResponse(userCart, userId);
         }
+
         String uniqueid = "";
         while (true) {
             uniqueid = UUID.randomUUID().toString();
-            Cart cart = cartRepository.findBySessionId(uniqueid).orElse(null);
-            if (cart == null) {
+            Cart cartBySessionId = cartRepository.findBySessionId(uniqueid).orElse(null);
+            if (cartBySessionId == null) {
                 break;
             }
         }
-        Cart cart = new Cart();
+
         cart.setSessionId(uniqueid);
-        cart.setUser(user);
-        return new CartResponse(cartRepository.save(cart), user.getId());
+        return new CartResponse(cartRepository.save(cart), userId);
     }
 
     @Override
     public CartResponse updateUserSession(int userId, String sessionId) throws Exception {
-        //take CartItem's from the sessionId
-        //find User by id
-        //take user's cart
-        //and add items
         Cart guestCart = cartRepository.findBySessionId(sessionId).orElse(null);
         if (guestCart == null) {
             throw new Exception("Cart Not Found");
         }
+
         User user = userRepository.findById(userId).orElse(null);
-        if(user == null ){
+        if (user == null) {
             throw new Exception("User ID not Valid!");
         }
+
+        Cart cart = cartRepository.findByUserId(userId).orElse(null);
+        if (cart != null) {
+            Set<CartItem> cartItems = cart.getCartItems();
+            if (cartItems != null && cartItems.size() > 0) {
+                for (CartItem i : cartItems) {
+                    CartItem cartItem = new CartItem();
+                    cartItem.setQuantity(i.getQuantity());
+                    cartItem.setRate(i.getRate());
+                    cartItem.setProduct(i.getProduct());
+                    Set<CartItemAttribute> attributes = new HashSet<>();
+                    if (i.getAttributes() != null && i.getAttributes().size() > 0) {
+                        for (CartItemAttribute a : i.getAttributes()) {
+                            CartItemAttribute attribute = new CartItemAttribute();
+                            attribute.setName(a.getName());
+                            Option option = new Option();
+                            option.setName(a.getOption().getName());
+                            option.setPrice(a.getOption().getPrice());
+                            attribute.setOption(option);
+                            attributes.add(attribute);
+                        }
+                    }
+                    cartItem.setAttributes(attributes);
+                    guestCart.getCartItems().add(cartItem);
+                }
+            }
+        }
+
         guestCart.setUser(user);
-        return new CartResponse(cartRepository.save(guestCart), userId);
+        cartRepository.save(guestCart);
+
+        if (cart != null) {
+            cartRepository.delete(cart);
+        }
+
+        return new CartResponse(guestCart, userId);
     }
 
     @Override
